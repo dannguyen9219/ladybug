@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const methodOverride = require('method-override');
 const mongoose = require('mongoose');
 const path = require('path');
+const supportTicketController = require('./controllers/supportTickets.js');
 
 // Database Connection //
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -23,19 +24,19 @@ mongoose.connection
   .on("error", (error) => console.log(error));
 ;
 
-// Models //
-const { Schema, model } = mongoose;
+// // Models //
+// const { Schema, model } = mongoose;
 
-// Bugs Schema //
-const bugsSchema = new Schema({
-    supportTicketTitle: String,
-    ticketStatus: String,
-    ticketDescription: String,
-    priority: String,
-});
+// // Bugs Schema //
+// const bugsSchema = new Schema({
+//     supportTicketTitle: String,
+//     ticketStatus: String,
+//     ticketDescription: String,
+//     priority: String,
+// });
 
-// Bug Model //
-const Bug = model('Bug', bugsSchema);
+// // Bug Model //
+// const Bug = model('Bug', bugsSchema);
 
 // Views Application Object Engine //
 const app = express();
@@ -48,39 +49,32 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static('public'));
 
+app.use((req, res, next) => {
+    console.log(req.body)
+    next()
+});
+
 /////////////////////////////
 /////// CRUD Routes ////////
 ///////////////////////////
 
-// Listening Route //
-app.get('/', (req, res) => {
-    res.send(`These bugs aren't the problem, they're the features!`)
-});
-
 // Seed Route //
-app.get('/bugs/seed', (req, res) => {
-    const startBugs = [
-        { supportTicketTitle: `Page Load`, ticketStatus: `open`, ticketDescription: `page 2 does not load`, priority: `medium`}
-    ]
-    Bug.deleteMany({}).then((data) => {
-        Bug.create(startBugs).then((data) => {
-            res.json(data);
-        })
-    }).catch((err) => {
-        res.status(400).send(err)
-    })
-});
+// app.get('/bugs/seed', (req, res) => {
+//     const startBugs = [
+//         { title: `Page Load`, ticketStatus: `open`, description: `page 2 does not load`, priority: `medium`}
+//     ]
+//     Bug.deleteMany({}).then((data) => {
+//         Bug.create(startBugs).then((data) => {
+//             res.json(data);
+//         })
+//     }).catch((err) => {
+//         res.status(400).send(err)
+//     })
+// });
 
-// Index Route //
-app.get('/bugs', (req, res) => {
-    Bug.find({})
-        .then((bugs) => {
-            res.render('bugs/Index', { bugs });
-        })
-        .catch((error) => {
-            res.json({ error })
-        })
-});
+
+// Controller Routes //
+app.use('/', supportTicketController);
 
 // Listening to PORT 8000 //
 const PORT = process.env.PORT;
